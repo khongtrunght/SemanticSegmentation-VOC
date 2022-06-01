@@ -113,7 +113,7 @@ class Trainer:
 
     def evaluate_accuracy(self):
         self.net.eval()
-        metric = d2l.Accumulator()
+        metric = d2l.Accumulator(2)
 
         with torch.no_grad():
             for X, y in self.test_iter:
