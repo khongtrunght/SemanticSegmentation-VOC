@@ -105,8 +105,5 @@ class Trainer:
 
     def wb_mask(self, bg_img, pred_mask, true_mask):
         return wandb.Image(bg_img, masks={
-            "prediction": {"mask_data": pred_mask, "class_labels": self.class_labels()},
-            "ground truth": {"mask_data": true_mask, "class_labels": self.class_labels()}})
-
-    def class_labels(self):
-        return self.class_labels
+            "prediction": {"mask_data": pred_mask, "class_labels": self.class_labels},
+            "ground truth": {"mask_data": true_mask, "class_labels": self.class_labels}})
