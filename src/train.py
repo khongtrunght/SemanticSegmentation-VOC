@@ -41,6 +41,8 @@ class Trainer:
         self.train_iter = train_iter
         self.test_iter = test_iter
 
+        self.trainer = torch.optim.Adam(net.parameters())
+
         self.test_samples = next(iter(test_iter))
         self.test_images = self.test_samples[0][:min(test_iter.batch_size, 8)]
         self.test_labels = self.test_samples[1][:min(test_iter.batch_size, 8)]
