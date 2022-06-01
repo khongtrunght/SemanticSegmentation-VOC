@@ -91,8 +91,10 @@ class Trainer:
               metric[0] / metric[2], "Acc: ", metric[1]/metric[3])
 
         self.net.eval()
+        with torch.no_grad():
+            pred_test = self.net(self.test_images.cuda()).argmax(dim=1)
 
-        pred_test = self.net(self.test_images.cuda()).argmax(dim=1)
+        test_acc = self.evaluate_accuracy()
 
         for i, (image, label) in enumerate(zip(self.test_images, self.test_labels)):
             pred_mask = pred_test[i].cpu().numpy()
@@ -100,10 +102,22 @@ class Trainer:
             mask_list.append(self.wb_mask(image.cpu(), pred_mask, true_mask))
 
         wandb.log({"Loss": metric[0] / metric[2],
-                  "Accuracy": metric[1]/metric[3]}, step=epoch)
+                  "Train Accuracy": metric[1]/metric[3],
+                   "Test Accuracy": test_acc}, step=epoch)
         wandb.log({"Prediction": mask_list}, step=epoch)
 
     def wb_mask(self, bg_img, pred_mask, true_mask):
         return wandb.Image(bg_img, masks={
             "prediction": {"mask_data": pred_mask, "class_labels": self.class_labels},
             "ground truth": {"mask_data": true_mask, "class_labels": self.class_labels}})
+
+    def evaluate_accuracy(self):
+        self.net.eval()
+        metric = d2l.Accumulator()
+
+        with torch.no_grad():
+            for X, y in self.test_iter:
+                X = X.cuda()
+                y = y.cuda()
+                metric.add(d2l.accuracy(self.net(X), y), d2l.size(y))
+        return metric[0] / metric[1]
