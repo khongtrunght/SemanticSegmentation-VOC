@@ -25,8 +25,8 @@ def bilinear_kernel(in_channels, out_channels, kernel_size):
 
 def get_net(num_classes):
     pretrained_net = torchvision.models.resnet18(pretrained=True)
-    net = torch.nn.Sequential(*list(pretrained_net.children())[:-1])
-    net.add_module('fc', torch.nn.Linear(512, num_classes))
+    net = torch.nn.Sequential(*list(pretrained_net.children())[:-2])
+    net.add_module('fc', torch.nn.Conv2d(512, num_classes, kernel_size=1))
     net.add_module('transpose_conv', torch.nn.ConvTranspose2d(
         num_classes, num_classes, kernel_size=64, padding=16, stride=32))
 
