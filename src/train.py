@@ -1,6 +1,7 @@
 from d2l import torch as d2l
 import torch
 import wandb
+from kornia.losses import FocalLoss, dice_loss
 
 
 def train(net, epochs, train_iter, test_iter=None):
@@ -48,8 +49,11 @@ class Trainer:
         self.test_labels = self.test_samples[1][:min(test_iter.batch_size, 8)]
         self.class_labels = kwargs.get('class_labels', None)
 
+        self.focal = FocalLoss(gamma=2)
+
     def loss(self, inputs, target):
-        return torch.nn.functional.cross_entropy(inputs, target, reduction='none').mean(dim=[1, 2])
+        # return torch.nn.functional.cross_entropy(inputs, target, reduction='none').mean(dim=[1, 2])
+        return self.focal(inputs, target, reduction='none').mean(dim=[1, 2])
 
     def train_step(self, iter):
         self.net.train()
@@ -61,7 +65,9 @@ class Trainer:
 
         outputs = self.net(features)
         loss_out = self.loss(outputs, labels)
-        loss_out.sum().backward()
+
+        loss_tong = loss_out.sum() + dice_loss(outputs, labels)
+        loss_tong.backward()
         self.trainer.step()
         train_loss_sum = loss_out.sum()
         train_acc_sum = d2l.accuracy(outputs, labels)
