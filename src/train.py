@@ -49,7 +49,7 @@ class Trainer:
         self.test_labels = self.test_samples[1][:min(test_iter.batch_size, 8)]
         self.class_labels = kwargs.get('class_labels', None)
 
-        self.focal = FocalLoss(gamma=2)
+        self.focal = FocalLoss(gamma=2, alpha=0.4)
 
     def loss(self, inputs, target):
         # return torch.nn.functional.cross_entropy(inputs, target, reduction='none').mean(dim=[1, 2])
